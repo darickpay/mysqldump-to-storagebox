@@ -1,7 +1,24 @@
 #!/usr/bin/bash
 
+# check if rclone is installed
+if ! command -v rclone &> /dev/null; then
+    echo "rclone could not be found. install it using apt."
+    exit 1
+fi
 
-# check if user if root
+# check if rclone is configured
+if [[ ! -f "$HOME/.config/rclone/rclone.conf" ]]; then
+	echo "rclone needs to be configured. check out documentation https://rclone.org/commands/rclone_config_file/"
+	exit 1
+fi
+
+# check if mysqldump user configured
+if [[ ! -f "$HOME/.my.cnf" ]]; then
+	echo "mysqldump needs to be configured. check out this link: https://stackoverflow.com/questions/9293042/how-to-perform-a-mysqldump-without-a-password-prompt"
+	exit 1
+fi
+
+# check if user is root
 if [ "$EUID" -ne 0 ]; then
     echo "Please run this script as root user"
     exit 1
@@ -24,12 +41,26 @@ check_if_was_successful() {
     fi
 }
 
-send_via_scp() {
-    scp -P 23 $BACKUP.cpt $storageBoxName@$storageBoxURL:$FILE_NAME.cpt
+
+remove_file_from_local() {
+    rm -rf $DEST
+}
+
+
+send_via_rclone() {
+		# create monthly archive directory
+		ARCHIVE_DIR=$BACKUP_DESTINATION/$FOLDER_DATE
+		rclone mkdir $ARCHIVE_DIR
+		echo "storage archive directory is: $ARCHIVE_DIR"
+		# copy to archive destination
+		DEST_FILE=$ARCHIVE_DIR/$FILE_NAME
+    rclone copyto $BACKUP $DEST_FILE
+		echo "backup file located at: $DEST_FILE"
 }
 
 
 DATE=$(date +%Y-%m-%d-%H-%M-%S)
+FOLDER_DATE=$(date +%Y-%m)
 mkdir -p $HOME/db_backups
 
 FILE_NAME=FEXDB-$DATE.sql
@@ -39,11 +70,25 @@ echo "backup file will be located at: $DEST with the name: $FILE_NAME"
 
 mkdir -p "$DEST"
 
-mysqldump -u root -p --single-transaction farhad > $BACKUP
+mysqldump -u root --single-transaction farhad > $BACKUP
 check_if_was_successful mysqlDump
 
-ccrypt -e -E secret -r $BACKUP
-check_if_was_successful encryption
 
-send_via_scp
-check_if_was_successful send_via_scp
+# check if encryption config provided
+if [[ "$1" == *"-"* && "$1" == *"e"* ]]; then
+	ccrypt -e -E SECRET -r $BACKUP
+	check_if_was_successful encryption
+	# after encryption file name must be changed.
+	FILE_NAME=FEXDB-$DATE.sql.cpt
+	BACKUP=$DEST/FEXDB-$DATE.sql.cpt
+fi
+
+send_via_rclone
+check_if_was_successful send_via_rclone
+
+# check if local file removal config provided
+if [[ "$1" == *"-"* && "$1" == *"r"* ]]; then
+	remove_file_from_local
+	check_if_was_successful remove_file_from_local
+	echo "file removed from local"
+fi
