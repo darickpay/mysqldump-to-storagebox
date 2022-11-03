@@ -1,4 +1,4 @@
-# mysqldump to storage
+# mysqldump to storagebox
 
 ## There are some dependencies to use this script:
 
