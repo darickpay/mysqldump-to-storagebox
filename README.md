@@ -21,4 +21,6 @@ Run with `-r` flag. This option will remove the local copy of the backup.
 
 Run with `-e` flag. This option will encrypt the backup dump using provided `SECRET` in the config file.
 
+Run with `-a` flag. This option will alert you and call the endpoint you provided in config file.
+
 example: `./backup-sql.sh -re`
