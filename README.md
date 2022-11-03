@@ -23,4 +23,4 @@ Run with `-e` flag. This option will encrypt the backup dump using provided `SEC
 
 Run with `-a` flag. This option will alert you and call the endpoint you provided in config file.
 
-example: `./backup-sql.sh -re`
+example: `./backup-sql.sh -rae`
