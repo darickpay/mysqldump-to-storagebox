@@ -39,17 +39,17 @@ fi
  . ./config.sh
 
 check_if_was_successful() {
-    if [[ $? != 0 ]]; then
-        echo "$1 failed ..."
-				# check if the admin wants to be alerted if something got wrong.
-				if [[ "$1" == *"-"* && "$1" == *"a"* ]]; then
-					curl $ALERT_ENDPOINT &> /dev/null
-					check_if_was_successful alert
-				fi
-				exit 1
-    else
-        echo "$1 is Done"
-    fi
+		if [[ $? != 0 ]]; then
+			echo "$1 failed ..."
+			# check if the admin wants to be alerted if something got wrong.
+			if [[ "$1" == *"-"* && "$1" == *"a"* ]]; then
+				curl $ALERT_ENDPOINT &> /dev/null
+				check_if_was_successful alert
+			fi
+			exit 1
+		else
+				echo "$1 is Done"
+		fi
 }
 
 
@@ -59,14 +59,14 @@ remove_file_from_local() {
 
 
 send_via_rclone() {
-		# create monthly archive directory
-		ARCHIVE_DIR=$BACKUP_DESTINATION/$FOLDER_DATE
-		rclone mkdir $ARCHIVE_DIR
-		echo "storage archive directory is: $ARCHIVE_DIR"
-		# copy to archive destination
-		DEST_FILE=$ARCHIVE_DIR/$FILE_NAME
-    rclone -P copyto $BACKUP $DEST_FILE
-		echo "backup file located at: $DEST_FILE"
+	# create monthly archive directory
+	ARCHIVE_DIR=$BACKUP_DESTINATION/$FOLDER_DATE
+	rclone mkdir $ARCHIVE_DIR
+	echo "storage archive directory is: $ARCHIVE_DIR"
+	# copy to archive destination
+	DEST_FILE=$ARCHIVE_DIR/$FILE_NAME
+	rclone -P copyto $BACKUP $DEST_FILE
+	echo "backup file located at: $DEST_FILE"
 }
 
 
