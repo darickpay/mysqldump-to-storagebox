@@ -39,17 +39,17 @@ fi
  . ./config.sh
 
 check_if_was_successful() {
-		if [[ $? != 0 ]]; then
-			echo "$1 failed ..."
-			# check if the admin wants to be alerted if something got wrong.
-			if [[ "$1" == *"-"* && "$1" == *"a"* ]]; then
-				curl $ALERT_ENDPOINT &> /dev/null
-				check_if_was_successful alert
-			fi
-			exit 1
-		else
-				echo "$1 is Done"
+	if [[ $? != 0 ]]; then
+		echo "$1 failed ..."
+		# check if the admin wants to be alerted if something got wrong.
+		if [[ "$1" == *"-"* && "$1" == *"a"* ]]; then
+			curl $ALERT_ENDPOINT &> /dev/null
+			check_if_was_successful alert
 		fi
+		exit 1
+	else
+			echo "$1 is Done"
+	fi
 }
 
 
