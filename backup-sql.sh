@@ -12,10 +12,15 @@ if [[ ! -f "$HOME/.config/rclone/rclone.conf" ]]; then
 	exit 1
 fi
 
+MYSQL_PASSWORD_NO=false
 # check if mysqldump user configured
-if [[ ! -f "$HOME/.my.cnf" ]]; then
-	echo "mysqldump needs to be configured. check out this link: https://stackoverflow.com/questions/9293042/how-to-perform-a-mysqldump-without-a-password-prompt"
-	exit 1
+if [[ "$1" == *"-"* && "$1" == *"m"* ]]; then
+	if [[ ! -f "$HOME/.my.cnf" ]]; then
+		echo "mysqldump needs to be configured. check out this link: https://stackoverflow.com/questions/9293042/how-to-perform-a-mysqldump-without-a-password-prompt"
+		exit 1
+	fi
+else
+	MYSQL_PASSWORD_NO=true
 fi
 
 # check if user is root
@@ -60,7 +65,7 @@ send_via_rclone() {
 		echo "storage archive directory is: $ARCHIVE_DIR"
 		# copy to archive destination
 		DEST_FILE=$ARCHIVE_DIR/$FILE_NAME
-    rclone copyto $BACKUP $DEST_FILE
+    rclone -P copyto $BACKUP $DEST_FILE
 		echo "backup file located at: $DEST_FILE"
 }
 
@@ -76,7 +81,11 @@ echo "backup file will be located at: $DEST with the name: $FILE_NAME"
 
 mkdir -p "$DEST"
 
-mysqldump -u root --single-transaction farhad > $BACKUP
+if [ $MYSQL_PASSWORD_NO = true ]; then
+	mysqldump -u $MYSQL_USER -p --single-transaction farhad > $BACKUP
+else
+	mysqldump -u $MYSQL_USER --single-transaction farhad > $BACKUP
+fi
 check_if_was_successful mysqlDump
 
 
