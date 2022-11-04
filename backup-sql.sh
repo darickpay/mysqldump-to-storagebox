@@ -12,7 +12,7 @@ if [[ ! -f "$HOME/.config/rclone/rclone.conf" ]]; then
 	exit 1
 fi
 
-MYSQL_PASSWORD_NO=false
+MYSQL_PASSWORD_PROMPT=false
 # check if mysqldump user configured
 if [[ "$1" == *"-"* && "$1" == *"m"* ]]; then
 	if [[ ! -f "$HOME/.my.cnf" ]]; then
@@ -20,7 +20,7 @@ if [[ "$1" == *"-"* && "$1" == *"m"* ]]; then
 		exit 1
 	fi
 else
-	MYSQL_PASSWORD_NO=true
+	MYSQL_PASSWORD_PROMPT=true
 fi
 
 # check if user is root
@@ -81,7 +81,7 @@ echo "backup file will be located at: $DEST with the name: $FILE_NAME"
 
 mkdir -p "$DEST"
 
-if [ $MYSQL_PASSWORD_NO = true ]; then
+if [ $MYSQL_PASSWORD_PROMPT = true ]; then
 	mysqldump -u $MYSQL_USER -p --single-transaction farhad > $BACKUP
 else
 	mysqldump -u $MYSQL_USER --single-transaction farhad > $BACKUP
